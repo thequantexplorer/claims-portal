@@ -17,3 +17,10 @@ export function formatFiledDate(isoDate) {
 export function byNewestFiled(a, b) {
   return Date.parse(b.filedAt) - Date.parse(a.filedAt);
 }
+
+/** Total reimbursed to the customer so far (cents), for the claims footer. */
+export function totalPaidCents(claims) {
+  return claims
+    .filter(c => statusLabel(c.status) === 'PAID')
+    .reduce((sum, c) => sum + c.amountCents, 0);
+}
