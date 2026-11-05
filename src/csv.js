@@ -2,15 +2,27 @@ import { formatCents, statusLabel } from './format.js';
 
 const COLUMNS = ['Claim', 'Type', 'Amount', 'Status', 'Submitted'];
 
-function csvCell(value) {
-  const s = String(value);
+function quote(s) {
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+/** Text from claims-service; a leading ' stops spreadsheets from evaluating it as a formula. */
+function textCell(value) {
+  const s = String(value ?? '');
+  return quote(/^[=+\-@\t\r]/.test(s) ? `'${s}` : s);
 }
 
 /** CSV of the customer's claims, in the same order as the My claims table. */
 export function claimsCsv(claims) {
-  const rows = claims.map(c => [c.id, c.type, formatCents(c.amountCents), statusLabel(c.status), c.submittedAt?.slice(0, 10) ?? '']);
-  return [COLUMNS, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
+  const header = COLUMNS.map(textCell).join(',');
+  const rows = claims.map(c => [
+    textCell(c.id),
+    textCell(c.type),
+    quote(formatCents(c.amountCents)),
+    textCell(statusLabel(c.status)),
+    textCell(c.submittedAt?.slice(0, 10)),
+  ].join(','));
+  return [header, ...rows].join('\r\n') + '\r\n';
 }
 
 /** e.g. claims-2026-11-04.csv */
