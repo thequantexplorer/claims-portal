@@ -9,3 +9,8 @@ test('pays the amount above the deductible minus coinsurance', () => {
 test('denied claims show no estimate', () => {
   assert.equal(estimateLabel({ status: 'DENIED', amountCents: 5000 }), '—');
 });
+
+test('claims under the remaining deductible estimate to zero, not negative', () => {
+  assert.equal(estimateReimbursement(8000, 16000, 20), 0);
+  assert.equal(estimateLabel({ status: 'APPROVED', amountCents: 8000, deductibleRemainingCents: 16000, coinsurancePct: 20 }), '~$0.00');
+});

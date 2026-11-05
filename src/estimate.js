@@ -5,7 +5,7 @@ import { formatCents } from './format.js';
  * above the remaining deductible, minus the member's coinsurance share.
  */
 export function estimateReimbursement(amountCents, deductibleRemainingCents, coinsurancePct) {
-  const covered = amountCents - deductibleRemainingCents;
+  const covered = Math.max(0, amountCents - deductibleRemainingCents);
   return Math.round(covered * (1 - coinsurancePct / 100));
 }
 
