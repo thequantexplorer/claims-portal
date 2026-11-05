@@ -16,3 +16,8 @@ test('shows the payout estimate only for approved claims', () => {
   assert.equal(hasPayoutEstimate({ status: 'APPROVED' }), true);
   assert.equal(hasPayoutEstimate({ status: 'IN_REVIEW' }), false);
 });
+
+test('stops coinsurance at the out-of-pocket maximum', () => {
+  const e = estimateReimbursement({ amountCents: 100000, deductibleRemainingCents: 0, coinsurancePct: 20, outOfPocketRemainingCents: 5000 });
+  assert.deepEqual(e, { deductibleCents: 0, coinsuranceCents: 5000, payableCents: 95000 });
+});

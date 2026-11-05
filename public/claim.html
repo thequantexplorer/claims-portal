@@ -13,7 +13,7 @@
 </section>
 <script type="module">
 import { escapeHtml, formatCents, statusLabel } from '/format.js';
-import { estimateReimbursement, hasPayoutEstimate } from '/reimbursement.js';
+import { estimateReimbursement, expectedPaymentDate, hasPayoutEstimate } from '/reimbursement.js';
 
 const id = new URLSearchParams(location.search).get('id');
 const c = await (await fetch(`/api/claims/${encodeURIComponent(id)}`)).json();
@@ -30,7 +30,8 @@ if (hasPayoutEstimate(c)) {
   document.querySelector('#breakdown').innerHTML = `
     <dt>Deductible</dt><dd>${formatCents(e.deductibleCents)}</dd>
     <dt>Your coinsurance</dt><dd>${formatCents(e.coinsuranceCents)}</dd>
-    <dt>We pay</dt><dd>${formatCents(e.payableCents)}</dd>`;
+    <dt>We pay</dt><dd>${formatCents(e.payableCents)}</dd>
+    <dt>Expected by</dt><dd>${expectedPaymentDate(c.approvedAt)}</dd>`;
   document.querySelector('#estimate').hidden = false;
 }
 </script>
