@@ -4,11 +4,15 @@
 <style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}</style></head>
 <body>
 <h1>My claims</h1>
-<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
+<p id="summary"></p>
+<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th><th>Estimated payout</th></tr></thead><tbody></tbody></table>
 <script type="module">
 import { formatCents, statusLabel } from '/format.js';
-const rows = await (await fetch('/api/claims')).json();
+import { estimatePayout, estimateSummary } from '/estimate.js';
+const [rows, plan] = await Promise.all([fetch('/api/claims'), fetch('/api/plan')].map(async r => (await r).json()));
+const s = estimateSummary(rows, plan);
+document.querySelector('#summary').textContent = `${s.count} open claims · about ${s.total} expected back`;
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td><td>${formatCents(estimatePayout(c.amountCents, plan.deductibleCents, plan.coinsurancePct))}</td></tr>`).join('');
 </script>
 </body></html>
