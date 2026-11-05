@@ -4,11 +4,23 @@
 <style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}</style></head>
 <body>
 <h1>My claims</h1>
+<input id="search" type="search" placeholder="Search by claim number or status" style="padding:8px;width:320px;margin-bottom:16px">
+<p id="empty" hidden></p>
 <table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
 <script type="module">
 import { formatCents, statusLabel } from '/format.js';
+import { filterClaims } from '/claims-filter.js';
 const rows = await (await fetch('/api/claims')).json();
-document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+const search = document.querySelector('#search');
+const empty = document.querySelector('#empty');
+function render() {
+  const shown = filterClaims(rows, search.value);
+  document.querySelector('#claims tbody').innerHTML = shown.map(c =>
+    `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+  empty.hidden = shown.length > 0;
+  empty.innerHTML = `No claims match <b>${search.value}</b>.`;
+}
+search.addEventListener('input', render);
+render();
 </script>
 </body></html>
