@@ -4,11 +4,16 @@
 <style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}</style></head>
 <body>
 <h1>My claims</h1>
-<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
+<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th><th>You receive</th></tr></thead><tbody></tbody></table>
 <script type="module">
 import { formatCents, statusLabel } from '/format.js';
-const rows = await (await fetch('/api/claims')).json();
+import { payableCents, newestFirst } from '/settlement.js';
+const [claims, policy] = await Promise.all([
+  fetch('/api/claims').then(r => r.json()),
+  fetch('/api/policy').then(r => r.json()),
+]);
+const rows = newestFirst(claims);
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td><td>${formatCents(payableCents(c, policy))}</td></tr>`).join('');
 </script>
 </body></html>
