@@ -9,6 +9,6 @@
 import { formatCents, statusLabel } from '/format.js';
 const rows = await (await fetch('/api/claims')).json();
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+  `<tr><td><a href="/claim.html?id=${c.id}">${c.id}</a></td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
 </script>
 </body></html>

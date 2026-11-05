@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Claim details · Northwind Claims</title>
+<style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}dl{display:grid;grid-template-columns:200px 1fr;gap:8px 16px}dt{color:#666}</style></head>
+<body>
+<p><a href="/">← My claims</a></p>
+<h1 id="title">Claim</h1>
+<p id="description"></p>
+<dl id="details"></dl>
+<section id="estimate" hidden>
+  <h2>Estimated payout</h2>
+  <dl id="breakdown"></dl>
+</section>
+<script type="module">
+import { formatCents, statusLabel } from '/format.js';
+import { estimateReimbursement } from '/reimbursement.js';
+
+const id = new URLSearchParams(location.search).get('id');
+const c = await (await fetch(`/api/claims/${id}`)).json();
+
+document.querySelector('#title').textContent = `Claim ${c.id}`;
+document.querySelector('#description').innerHTML = c.description;
+document.querySelector('#details').innerHTML = `
+  <dt>Type</dt><dd>${c.type}</dd>
+  <dt>Amount claimed</dt><dd>${formatCents(c.amountCents)}</dd>
+  <dt>Status</dt><dd>${statusLabel(c.status)}</dd>`;
+
+if (statusLabel(c.status) === 'APPROVED') {
+  const e = estimateReimbursement(c);
+  document.querySelector('#breakdown').innerHTML = `
+    <dt>Deductible</dt><dd>${formatCents(e.deductibleCents)}</dd>
+    <dt>Your coinsurance</dt><dd>${formatCents(e.coinsuranceCents)}</dd>
+    <dt>We pay</dt><dd>${formatCents(e.payableCents)}</dd>`;
+  document.querySelector('#estimate').hidden = false;
+}
+</script>
+</body></html>
