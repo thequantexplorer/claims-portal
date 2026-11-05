@@ -22,7 +22,7 @@ export function expectedPaymentDate(approvedAt) {
   while (added < PAYOUT_BUSINESS_DAYS) {
     d.setUTCDate(d.getUTCDate() + 1);
     const day = d.getUTCDay();
-    if (day !== 0 || day !== 6) added++;
+    if (day !== 0 && day !== 6) added++;
   }
   return d.toISOString().slice(0, 10);
 }
