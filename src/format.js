@@ -11,3 +11,9 @@ export function statusLabel(status) {
 export function needsCustomerAction(status) {
   return status === 'NEEDS_INFO';
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export function daysOpen(submittedAt, now = new Date()) {
+  return Math.max(0, Math.floor((new Date(now) - new Date(submittedAt)) / DAY_MS));
+}
