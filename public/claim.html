@@ -12,20 +12,20 @@
   <dl id="breakdown"></dl>
 </section>
 <script type="module">
-import { formatCents, statusLabel } from '/format.js';
-import { estimateReimbursement } from '/reimbursement.js';
+import { escapeHtml, formatCents, statusLabel } from '/format.js';
+import { estimateReimbursement, hasPayoutEstimate } from '/reimbursement.js';
 
 const id = new URLSearchParams(location.search).get('id');
-const c = await (await fetch(`/api/claims/${id}`)).json();
+const c = await (await fetch(`/api/claims/${encodeURIComponent(id)}`)).json();
 
 document.querySelector('#title').textContent = `Claim ${c.id}`;
-document.querySelector('#description').innerHTML = c.description;
+document.querySelector('#description').textContent = c.description ?? '';
 document.querySelector('#details').innerHTML = `
-  <dt>Type</dt><dd>${c.type}</dd>
+  <dt>Type</dt><dd>${escapeHtml(c.type)}</dd>
   <dt>Amount claimed</dt><dd>${formatCents(c.amountCents)}</dd>
-  <dt>Status</dt><dd>${statusLabel(c.status)}</dd>`;
+  <dt>Status</dt><dd>${escapeHtml(statusLabel(c.status))}</dd>`;
 
-if (statusLabel(c.status) === 'APPROVED') {
+if (hasPayoutEstimate(c)) {
   const e = estimateReimbursement(c);
   document.querySelector('#breakdown').innerHTML = `
     <dt>Deductible</dt><dd>${formatCents(e.deductibleCents)}</dd>

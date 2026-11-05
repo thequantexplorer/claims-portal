@@ -6,9 +6,9 @@
 <h1>My claims</h1>
 <table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
 <script type="module">
-import { formatCents, statusLabel } from '/format.js';
+import { escapeHtml, formatCents, statusLabel } from '/format.js';
 const rows = await (await fetch('/api/claims')).json();
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td><a href="/claim.html?id=${c.id}">${c.id}</a></td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+  `<tr><td><a href="/claim.html?id=${escapeHtml(encodeURIComponent(c.id))}">${escapeHtml(c.id)}</a></td><td>${escapeHtml(c.type)}</td><td>${formatCents(c.amountCents)}</td><td>${escapeHtml(statusLabel(c.status))}</td></tr>`).join('');
 </script>
 </body></html>

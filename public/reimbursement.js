@@ -11,3 +11,7 @@ export function estimateReimbursement({ amountCents, deductibleRemainingCents, c
     payableCents,
   };
 }
+
+export function hasPayoutEstimate(claim) {
+  return claim.status === 'APPROVED';
+}
