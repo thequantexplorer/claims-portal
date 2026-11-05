@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requiredDocuments, canWithdraw } from '../public/documents.js';
+import { requiredDocuments, canWithdraw, withdrawClaim } from '../public/documents.js';
 
 test('theft claims need proof of ownership', () =>
   assert.deepEqual(requiredDocuments({ type: 'THEFT', status: 'SUBMITTED', amountCents: 50000 }),
@@ -12,4 +12,14 @@ test('paid claims cannot be withdrawn', () => assert.equal(canWithdraw({ status:
 test('decided claims need no documents', () => {
   for (const status of ['APPROVED', 'DENIED', 'PAID'])
     assert.deepEqual(requiredDocuments({ type: 'PROPERTY', status, amountCents: 50000 }), []);
+});
+test('withdrawClaim encodes the claim id and POSTs', async t => {
+  const calls = [];
+  t.mock.method(globalThis, 'fetch', async (url, opts) => { calls.push([url, opts.method]); return { ok: true }; });
+  await withdrawClaim('a/b');
+  assert.deepEqual(calls, [['/api/claims/a%2Fb/withdraw', 'POST']]);
+});
+test('withdrawClaim throws on a failed response', async t => {
+  t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 409 }));
+  await assert.rejects(withdrawClaim('1'), /409/);
 });
