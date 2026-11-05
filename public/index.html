@@ -7,9 +7,10 @@
 <table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th><th>Estimate</th></tr></thead><tbody></tbody></table>
 <script type="module">
 import { formatCents, statusLabel } from '/format.js';
-import { estimateLabel } from '/estimate.js';
+import { estimateClaims, estimateLabel } from '/estimate.js';
 const rows = await (await fetch('/api/claims')).json();
+const estimates = estimateClaims(rows);
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td><td>${estimateLabel(c)}</td></tr>`).join('');
+  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td><td>${estimateLabel(c, estimates)}</td></tr>`).join('');
 </script>
 </body></html>
