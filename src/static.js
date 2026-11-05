@@ -3,12 +3,11 @@ import path from 'node:path';
 
 export function staticPath(root, url) {
   const { pathname } = new URL(url, 'http://localhost');
-  const realRoot = fs.realpathSync(root);
-  let file;
   try {
-    file = fs.realpathSync(path.join(root, pathname === '/' ? 'index.html' : pathname));
+    const realRoot = fs.realpathSync(root);
+    const file = fs.realpathSync(path.join(root, pathname === '/' ? 'index.html' : pathname));
+    return file.startsWith(realRoot + path.sep) && fs.statSync(file).isFile() ? file : null;
   } catch {
     return null;
   }
-  return file.startsWith(realRoot + path.sep) && fs.statSync(file).isFile() ? file : null;
 }

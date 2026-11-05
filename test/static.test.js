@@ -18,3 +18,5 @@ test('ignores the query string when looking up a static file', () =>
 test('returns null for missing files', () => assert.equal(staticPath(root, '/nope.html'), null));
 test('keeps traversal inside the root', () => assert.equal(staticPath(root, '/../secret.txt'), null));
 test('refuses symlinks that point outside the root', () => assert.equal(staticPath(root, '/leak.txt'), null));
+test('returns null when the root does not exist', () =>
+  assert.equal(staticPath(path.join(root, 'missing'), '/'), null));
