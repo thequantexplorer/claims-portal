@@ -8,14 +8,19 @@
 <script type="module">
 import { formatCents, statusLabel } from '/format.js';
 import { requiredDocuments, canWithdraw, withdrawClaim } from '/documents.js';
+import { escapeHtml } from '/html.js';
 const rows = await (await fetch('/api/claims')).json();
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td><td>${requiredDocuments(c).join(', ')}</td>` +
-  `<td>${canWithdraw(c) ? `<button data-withdraw="${c.id}">Withdraw</button>` : ''}</td></tr>`).join('');
+  `<tr><td>${escapeHtml(c.id)}</td><td>${escapeHtml(c.type)}</td><td>${formatCents(c.amountCents)}</td><td>${escapeHtml(statusLabel(c.status))}</td><td>${escapeHtml(requiredDocuments(c).join(', '))}</td>` +
+  `<td>${canWithdraw(c) ? `<button data-withdraw="${escapeHtml(c.id)}">Withdraw</button>` : ''}</td></tr>`).join('');
 document.querySelectorAll('[data-withdraw]').forEach(b => b.onclick = async () => {
   if (!confirm('Withdraw this claim?')) return;
-  await withdrawClaim(b.dataset.withdraw);
-  location.reload();
+  try {
+    await withdrawClaim(b.dataset.withdraw);
+    location.reload();
+  } catch {
+    alert('Sorry, we could not withdraw this claim. Please try again.');
+  }
 });
 </script>
 </body></html>

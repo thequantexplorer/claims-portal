@@ -6,17 +6,20 @@ const BY_TYPE = {
   PROPERTY: [],
 };
 
+const OPEN_STATUSES = ['SUBMITTED', 'IN_REVIEW'];
+
 export function requiredDocuments(claim) {
+  if (!OPEN_STATUSES.includes(claim.status)) return [];
   const docs = ['claim form', 'photo of damage', ...(BY_TYPE[claim.type] ?? [])];
   if (claim.amountCents > 1000000) docs.push('two repair estimates');
   return docs;
 }
 
 export function canWithdraw(claim) {
-  return claim.status === 'SUBMITTED' || claim.status === 'IN_REVIEW';
+  return OPEN_STATUSES.includes(claim.status);
 }
 
 export async function withdrawClaim(id) {
-  const r = await fetch(`/api/claims/${id}/withdraw`, { method: 'POST' });
+  const r = await fetch(`/api/claims/${encodeURIComponent(id)}/withdraw`, { method: 'POST' });
   if (!r.ok) throw new Error(`withdraw failed: ${r.status}`);
 }
