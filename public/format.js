@@ -5,5 +5,9 @@ export function formatCents(cents) {
 }
 
 export function statusLabel(status) {
-  return { SUBMITTED: 'Received', IN_REVIEW: 'In review', APPROVED: 'Approved', DENIED: 'Not approved', PAID: 'Paid' }[status] ?? status;
+  return { SUBMITTED: 'Received', IN_REVIEW: 'In review', APPROVED: 'Approved', DENIED: 'Not approved', PAID: 'Paid', NEEDS_INFO: 'Waiting on you', CLOSED: 'Closed' }[status] ?? status;
+}
+
+export function needsCustomerAction(status) {
+  return status === 'NEEDS_INFO';
 }
