@@ -4,11 +4,16 @@
 <style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}</style></head>
 <body>
 <h1>My claims</h1>
-<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
+<p id="summary"></p>
+<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th><th>Open for</th></tr></thead><tbody></tbody></table>
 <script type="module">
 import { formatCents, statusLabel } from '/format.js';
+import { openClaims, daysOpen, outstandingCents } from '/claims.js';
 const rows = await (await fetch('/api/claims')).json();
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td><td>${openClaims([c]).length ? daysOpen(c.submittedAt) + ' days' : ''}</td></tr>`).join('');
+const open = openClaims(rows);
+document.querySelector('#summary').textContent =
+  `${open.length} open claims · ${formatCents(outstandingCents(open))} outstanding`;
 </script>
 </body></html>
