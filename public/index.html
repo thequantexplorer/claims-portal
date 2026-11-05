@@ -14,8 +14,12 @@ document.querySelector('#claims tbody').innerHTML = rows.map(c =>
   `<td>${canWithdraw(c) ? `<button data-withdraw="${c.id}">Withdraw</button>` : ''}</td></tr>`).join('');
 document.querySelectorAll('[data-withdraw]').forEach(b => b.onclick = async () => {
   if (!confirm('Withdraw this claim?')) return;
-  await withdrawClaim(b.dataset.withdraw);
-  location.reload();
+  try {
+    await withdrawClaim(b.dataset.withdraw);
+    location.reload();
+  } catch {
+    alert('Sorry, we could not withdraw this claim. Please try again.');
+  }
 });
 </script>
 </body></html>

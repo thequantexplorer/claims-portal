@@ -6,14 +6,17 @@ const BY_TYPE = {
   PROPERTY: [],
 };
 
+const OPEN = ['SUBMITTED', 'IN_REVIEW'];
+
 export function requiredDocuments(claim) {
+  if (!OPEN.includes(claim.status)) return [];
   const docs = ['claim form', 'photo of damage', ...(BY_TYPE[claim.type] ?? [])];
-  if (claim.amountCents > 1000000) docs.push('two repair estimates');
+  if (claim.amountCents >= 1000000) docs.push('two repair estimates');
   return docs;
 }
 
 export function canWithdraw(claim) {
-  return claim.status === 'SUBMITTED' || claim.status === 'IN_REVIEW';
+  return OPEN.includes(claim.status);
 }
 
 export async function withdrawClaim(id) {
