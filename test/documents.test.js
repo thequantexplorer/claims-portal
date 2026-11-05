@@ -15,9 +15,9 @@ test('decided claims need no documents', () => {
 });
 test('withdrawClaim encodes the claim id and POSTs', async t => {
   const calls = [];
-  t.mock.method(globalThis, 'fetch', async (url, opts) => { calls.push([url, opts.method]); return { ok: true }; });
+  t.mock.method(globalThis, 'fetch', async (url, opts) => { calls.push([url, opts.method, opts.headers['X-Requested-With']]); return { ok: true }; });
   await withdrawClaim('a/b');
-  assert.deepEqual(calls, [['/api/claims/a%2Fb/withdraw', 'POST']]);
+  assert.deepEqual(calls, [['/api/claims/a%2Fb/withdraw', 'POST', 'claims-portal']]);
 });
 test('withdrawClaim throws on a failed response', async t => {
   t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 409 }));

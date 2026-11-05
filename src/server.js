@@ -13,8 +13,10 @@ async function readBody(req) {
 
 function isCrossSite(req) {
   if (req.method === 'GET' || req.method === 'HEAD') return false;
+  // Custom header forces a CORS preflight, so cross-site pages cannot send it.
+  if (req.headers['x-requested-with'] !== 'claims-portal') return true;
   const origin = req.headers.origin;
-  if (!origin) return req.headers['sec-fetch-site'] !== undefined && req.headers['sec-fetch-site'] !== 'same-origin';
+  if (!origin) return false;
   try { return new URL(origin).host !== req.headers.host; } catch { return true; }
 }
 

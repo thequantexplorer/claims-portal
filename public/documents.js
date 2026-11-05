@@ -20,6 +20,6 @@ export function canWithdraw(claim) {
 }
 
 export async function withdrawClaim(id) {
-  const r = await fetch(`/api/claims/${encodeURIComponent(id)}/withdraw`, { method: 'POST' });
+  const r = await fetch(`/api/claims/${encodeURIComponent(id)}/withdraw`, { method: 'POST', headers: { 'X-Requested-With': 'claims-portal' } });
   if (!r.ok) throw new Error(`withdraw failed: ${r.status}`);
 }
