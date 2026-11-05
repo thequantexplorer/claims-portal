@@ -14,6 +14,6 @@ http.createServer(async (req, res) => {
     return;
   }
   const file = staticPath(root, req.url);
-  if (!file || !fs.existsSync(file)) { res.writeHead(404); res.end(); return; }
+  if (!file) { res.writeHead(404); res.end(); return; }
   res.writeHead(200); fs.createReadStream(file).pipe(res);
 }).listen(3000, () => console.log('claims-portal on http://localhost:3000'));
