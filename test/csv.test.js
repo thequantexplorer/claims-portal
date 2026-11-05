@@ -10,3 +10,8 @@ test('writes a header and one row per claim', () => {
 test('names the file with the calendar month', () => {
   assert.equal(csvFilename(new Date(2026, 10, 4)), 'claims-2026-11-04.csv');
 });
+
+test('quotes values that contain commas or quotes', () => {
+  const csv = claimsCsv([{ id: 'CLM-2', type: 'Vision, "premium"', amountCents: 123456, status: 'APPROVED' }]);
+  assert.equal(csv.split('\r\n')[1], 'CLM-2,"Vision, ""premium""","$1,234.56",Approved,');
+});
