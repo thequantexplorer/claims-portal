@@ -1,4 +1,4 @@
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -11,6 +11,10 @@ fs.writeFileSync(path.join(root, 'index.html'), '');
 fs.writeFileSync(path.join(root, 'claim.html'), '');
 fs.writeFileSync(path.join(outside, 'secret.txt'), '');
 fs.symlinkSync(path.join(outside, 'secret.txt'), path.join(root, 'leak.txt'));
+after(() => {
+  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(outside, { recursive: true, force: true });
+});
 
 test('serves index.html for /', () => assert.equal(staticPath(root, '/'), path.join(root, 'index.html')));
 test('ignores the query string when looking up a static file', () =>
