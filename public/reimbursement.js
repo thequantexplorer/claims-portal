@@ -5,7 +5,8 @@
  */
 export function estimateReimbursement({ amountCents, deductibleRemainingCents, coinsurancePct, outOfPocketRemainingCents = Infinity }) {
   const afterDeductible = Math.max(amountCents - deductibleRemainingCents, 0);
-  const coinsuranceCents = Math.min(Math.round(afterDeductible * coinsurancePct / 100), outOfPocketRemainingCents);
+  const uncappedPayableCents = Math.round(afterDeductible * (100 - coinsurancePct) / 100);
+  const coinsuranceCents = Math.min(afterDeductible - uncappedPayableCents, outOfPocketRemainingCents);
   return {
     deductibleCents: Math.min(deductibleRemainingCents, amountCents),
     coinsuranceCents,

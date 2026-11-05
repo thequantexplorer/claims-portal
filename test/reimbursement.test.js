@@ -32,3 +32,8 @@ test('has no expected payment date without an approval date', () => {
   assert.equal(expectedPaymentDate(null), null);
   assert.equal(expectedPaymentDate('not a date'), null);
 });
+
+test('rounds half-cent ties in the customer\'s favour', () => {
+  const e = estimateReimbursement({ amountCents: 1, deductibleRemainingCents: 0, coinsurancePct: 50 });
+  assert.deepEqual(e, { deductibleCents: 0, coinsuranceCents: 0, payableCents: 1 });
+});
