@@ -7,3 +7,8 @@ export function formatCents(cents) {
 export function statusLabel(status) {
   return { SUBMITTED: 'Received', IN_REVIEW: 'In review', APPROVED: 'Approved', DENIED: 'Not approved', PAID: 'Paid' }[status] ?? status;
 }
+
+/** "Nov 3, 2026" for a claim's filed date (ISO yyyy-mm-dd). */
+export function formatFiledDate(isoDate) {
+  return new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
