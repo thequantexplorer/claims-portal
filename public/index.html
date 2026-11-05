@@ -4,11 +4,14 @@
 <style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}</style></head>
 <body>
 <h1>My claims</h1>
+<p id="summary"></p>
 <table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
 <script type="module">
+import { openClaimsSummary } from '/summary.js';
 import { formatCents, statusLabel } from '/format.js';
 const rows = await (await fetch('/api/claims')).json();
 document.querySelector('#claims tbody').innerHTML = rows.map(c =>
   `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+document.querySelector('#summary').textContent = openClaimsSummary(rows);
 </script>
 </body></html>
