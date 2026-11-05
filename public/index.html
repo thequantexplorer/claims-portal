@@ -4,11 +4,21 @@
 <style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}</style></head>
 <body>
 <h1>My claims</h1>
+<p><input id="q" placeholder="Search claims"> <select id="status"><option value="">All statuses</option><option>Received</option><option>In review</option><option>Approved</option><option>Not approved</option><option>Paid</option></select></p>
 <table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
 <script type="module">
 import { formatCents, statusLabel } from '/format.js';
+import { filterClaims } from '/filters.js';
 const rows = await (await fetch('/api/claims')).json();
-document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+const q = document.querySelector('#q'), status = document.querySelector('#status');
+function render() {
+  const shown = filterClaims(rows, { query: q.value, status: status.value });
+  document.querySelector('#claims tbody').innerHTML = shown.length
+    ? shown.map(c => `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('')
+    : `<tr><td colspan="4">No claims match "${q.value}"</td></tr>`;
+}
+q.addEventListener('input', render);
+status.addEventListener('change', render);
+render();
 </script>
 </body></html>
