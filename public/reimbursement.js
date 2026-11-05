@@ -17,7 +17,9 @@ const PAYOUT_BUSINESS_DAYS = 10;
 
 /** We pay approved claims within ten business days of approval. */
 export function expectedPaymentDate(approvedAt) {
+  if (!approvedAt) return null;
   const d = new Date(approvedAt);
+  if (Number.isNaN(d.getTime())) return null;
   let added = 0;
   while (added < PAYOUT_BUSINESS_DAYS) {
     d.setUTCDate(d.getUTCDate() + 1);

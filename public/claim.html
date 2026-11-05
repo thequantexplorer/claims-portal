@@ -31,7 +31,7 @@ if (hasPayoutEstimate(c)) {
     <dt>Deductible</dt><dd>${formatCents(e.deductibleCents)}</dd>
     <dt>Your coinsurance</dt><dd>${formatCents(e.coinsuranceCents)}</dd>
     <dt>We pay</dt><dd>${formatCents(e.payableCents)}</dd>
-    <dt>Expected by</dt><dd>${expectedPaymentDate(c.approvedAt)}</dd>`;
+    <dt>Expected by</dt><dd>${expectedPaymentDate(c.approvedAt) ?? 'Pending'}</dd>`;
   document.querySelector('#estimate').hidden = false;
 }
 </script>

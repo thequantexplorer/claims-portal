@@ -26,3 +26,9 @@ test('expected payment date skips weekends', () => {
   // Friday 2026-11-06 + 10 business days lands on Friday 2026-11-20.
   assert.equal(expectedPaymentDate('2026-11-06T15:00:00Z'), '2026-11-20');
 });
+
+test('has no expected payment date without an approval date', () => {
+  assert.equal(expectedPaymentDate(undefined), null);
+  assert.equal(expectedPaymentDate(null), null);
+  assert.equal(expectedPaymentDate('not a date'), null);
+});
