@@ -11,6 +11,16 @@ test('splits a payout by percentage', () => {
   assert.equal(splitSummary(rows), 'Ana Lima (60%): $6,300.00\nFirst Federal Auto (40%): $4,200.00');
 });
 
+test('allocated cents always sum to the payable amount', () => {
+  assert.deepEqual(splitPayout(1, [{ name: 'A', percent: 50 }, { name: 'B', percent: 50 }]).map(r => r.cents), [1, 0]);
+  assert.deepEqual(
+    splitPayout(1, [{ name: 'A', percent: 33 }, { name: 'B', percent: 33 }, { name: 'C', percent: 34 }]).map(r => r.cents),
+    [0, 0, 1],
+  );
+  const rows = splitPayout(100, [{ name: 'A', percent: 33 }, { name: 'B', percent: 33 }, { name: 'C', percent: 34 }]);
+  assert.equal(rows.reduce((s, r) => s + r.cents, 0), 100);
+});
+
 test('rejects shares that do not add up to 100%', () => {
   assert.throws(() => splitPayout(100000, [{ name: 'A', percent: 50 }, { name: 'B', percent: 40 }]));
 });
