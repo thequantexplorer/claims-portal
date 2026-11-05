@@ -10,5 +10,10 @@ export function statusLabel(status) {
 
 /** "Nov 3, 2026" for a claim's filed date (ISO yyyy-mm-dd). */
 export function formatFiledDate(isoDate) {
-  return new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+}
+
+/** Sort comparator: newest filedAt (ISO date string) first. */
+export function byNewestFiled(a, b) {
+  return Date.parse(b.filedAt) - Date.parse(a.filedAt);
 }
