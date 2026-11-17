@@ -1,14 +1,83 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><title>Northwind Claims</title>
-<style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left}</style></head>
+<style>body{font-family:system-ui,sans-serif;margin:40px;color:#111}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}.files{margin:0 0 6px;padding-left:18px}.files:empty{display:none}.upload-hint{color:#555;font-size:.9em}.upload-status{display:block;margin-top:4px;color:#555}.upload-status.error{color:#b00020}</style></head>
 <body>
 <h1>My claims</h1>
-<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
+<table id="claims"><thead><tr><th>Claim</th><th>Type</th><th>Amount</th><th>Status</th><th>Attachments</th></tr></thead><tbody></tbody></table>
 <script type="module">
-import { formatCents, statusLabel } from '/format.js';
-const rows = await (await fetch('/api/claims')).json();
-document.querySelector('#claims tbody').innerHTML = rows.map(c =>
-  `<tr><td>${c.id}</td><td>${c.type}</td><td>${formatCents(c.amountCents)}</td><td>${statusLabel(c.status)}</td></tr>`).join('');
+import { formatCents, statusLabel, escapeHtml, isOpenStatus, uploadError, formatBytes, MAX_UPLOAD_BYTES, ACCEPTED_TYPES } from '/format.js';
+
+const table = document.querySelector('#claims');
+const claimPath = id => `/api/claims/${encodeURIComponent(id)}/attachments`;
+
+function attachmentItem(claimId, a) {
+  const href = `${claimPath(claimId)}/${encodeURIComponent(a.id)}`;
+  return `<li><a href="${escapeHtml(href)}">${escapeHtml(a.fileName)}</a> (${escapeHtml(formatBytes(a.sizeBytes))})</li>`;
+}
+
+function uploadControl(c) {
+  if (!isOpenStatus(c.status)) return '';
+  return `<input type="file" accept="${ACCEPTED_TYPES.join(',')}" aria-label="Choose a file for claim ${escapeHtml(c.id)}">`
+    + ' <button type="button" data-action="upload">Upload file</button>'
+    + ' <span class="upload-hint">JPEG, PNG or PDF, up to 10 MB</span>';
+}
+
+function row(c) {
+  return `<tr data-claim-id="${escapeHtml(c.id)}"><td>${escapeHtml(c.id)}</td><td>${escapeHtml(c.type)}</td>`
+    + `<td>${escapeHtml(formatCents(c.amountCents))}</td><td>${escapeHtml(statusLabel(c.status))}</td>`
+    + `<td><ul class="files"></ul>${uploadControl(c)}<span class="upload-status" role="status"></span></td></tr>`;
+}
+
+function setStatus(tr, message, isError = false) {
+  const el = tr.querySelector('.upload-status');
+  el.textContent = message;
+  el.classList.toggle('error', isError);
+}
+
+async function loadAttachments(tr) {
+  const claimId = tr.dataset.claimId;
+  try {
+    const res = await fetch(claimPath(claimId));
+    if (!res.ok) throw new Error(String(res.status));
+    const items = await res.json();
+    tr.querySelector('.files').innerHTML = items.map(a => attachmentItem(claimId, a)).join('');
+  } catch {
+    setStatus(tr, 'Attachments unavailable', true);
+  }
+}
+
+async function upload(tr) {
+  const input = tr.querySelector('input[type=file]');
+  const button = tr.querySelector('[data-action=upload]');
+  const file = input.files[0];
+  if (!file) return setStatus(tr, uploadError(400), true);
+  if (file.size > MAX_UPLOAD_BYTES) return setStatus(tr, uploadError(413), true);
+  const body = new FormData();
+  body.append('file', file);
+  button.disabled = true;
+  setStatus(tr, 'Uploading…');
+  try {
+    const res = await fetch(claimPath(tr.dataset.claimId), { method: 'POST', body });
+    if (res.status !== 201) return setStatus(tr, uploadError(res.status), true);
+    const a = await res.json();
+    tr.querySelector('.files').insertAdjacentHTML('beforeend', attachmentItem(tr.dataset.claimId, a));
+    input.value = '';
+    setStatus(tr, `Uploaded ${a.fileName}.`);
+  } catch {
+    setStatus(tr, uploadError(0), true);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+table.addEventListener('click', e => {
+  const button = e.target.closest('[data-action=upload]');
+  if (button) upload(button.closest('tr'));
+});
+
+const claims = await (await fetch('/api/claims')).json();
+table.querySelector('tbody').innerHTML = claims.map(row).join('');
+table.querySelectorAll('tbody tr').forEach(loadAttachments);
 </script>
 </body></html>
