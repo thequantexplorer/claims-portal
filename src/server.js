@@ -1,15 +1,14 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { proxyRequest } from './proxy.js';
 
 const root = path.resolve('public');
 const api = process.env.CLAIMS_API ?? 'http://localhost:8080';
 
 http.createServer(async (req, res) => {
   if (req.url.startsWith('/api/')) {
-    const r = await fetch(api + req.url, { headers: { 'X-User-Id': 'cust-ana', 'X-User-Role': 'CUSTOMER' } });
-    res.writeHead(r.status, { 'Content-Type': r.headers.get('content-type') ?? 'application/json' });
-    res.end(Buffer.from(await r.arrayBuffer()));
+    await proxyRequest(req, res, api);
     return;
   }
   const file = path.join(root, req.url === '/' ? 'index.html' : req.url);
